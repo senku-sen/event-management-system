@@ -13,6 +13,10 @@ export default function GroupsPage() {
   const [error, setError] = useState("")
   const [user, setUser] = useState(null)
   const [expandedGroups, setExpandedGroups] = useState(new Set())
+  const [searchTerm, setSearchTerm] = useState("")
+  const [visibilityFilter, setVisibilityFilter] = useState("all")
+  const [sortBy, setSortBy] = useState("name")
+  const [eventSearchTerms, setEventSearchTerms] = useState({})
 
 
   useEffect(() => {
@@ -47,10 +51,63 @@ export default function GroupsPage() {
     setExpandedGroups(newExpanded)
   }
 
-  const displayGroups = groups.filter(group => {
-    // Admins see all groups, users see only public groups
-    return user?.role === 'admin' || group.visibility === 'public'
-  })
+  const filteredAndSortedGroups = () => {
+    let filtered = groups.filter(group => {
+      // Role-based filtering: Admins see all groups, users see only public groups
+      const roleFilter = user?.role === 'admin' || group.visibility === 'public'
+      
+      // Search filter: search in name, description, and event titles
+      const searchFilter = searchTerm === "" || 
+        group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        group.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        group.events?.some(event => 
+          event.title?.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      
+      // Visibility filter
+      const visibilityFilterMatch = visibilityFilter === "all" || 
+        group.visibility === visibilityFilter
+      
+      return roleFilter && searchFilter && visibilityFilterMatch
+    })
+
+    // Sort groups
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "name":
+          return a.name.localeCompare(b.name)
+        case "events":
+          return (b.eventCount || 0) - (a.eventCount || 0)
+        case "maxEvents":
+          return (b.maxEvents || 0) - (a.maxEvents || 0)
+        case "newest":
+          return (b.id || 0) - (a.id || 0)
+        default:
+          return 0
+      }
+    })
+
+    return filtered
+  }
+
+  const displayGroups = filteredAndSortedGroups()
+
+  const filterEvents = (events, groupId) => {
+    const eventSearchTerm = eventSearchTerms[groupId] || ""
+    if (!eventSearchTerm) return events || []
+    
+    return (events || []).filter(event =>
+      event.title?.toLowerCase().includes(eventSearchTerm.toLowerCase()) ||
+      event.date?.includes(eventSearchTerm)
+    )
+  }
+
+  const updateEventSearchTerm = (groupId, term) => {
+    setEventSearchTerms(prev => ({
+      ...prev,
+      [groupId]: term
+    }))
+  }
 
   return (
     <div className="container">
@@ -326,6 +383,113 @@ export default function GroupsPage() {
           font-size: 1rem;
           padding: 3rem;
         }
+
+        .search-filters {
+          width: 100%;
+          max-width: 1200px;
+          margin-bottom: 2rem;
+          background: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(21, 34, 221, 0.1);
+          padding: 1.5rem;
+        }
+
+        .search-bar {
+          display: flex;
+          gap: 1rem;
+          margin-bottom: 1rem;
+          flex-wrap: wrap;
+          align-items: center;
+        }
+
+        .search-input {
+          flex: 1;
+          min-width: 250px;
+          padding: 0.5rem;
+          border: 1px solid #787c83ff;
+          border-radius: 6px;
+          font-size: 0.875rem;
+          background-color: #9ca2a8ff;
+        }
+
+        .search-input:focus {
+          outline: none;
+          border-color: #6a8eddff;
+          box-shadow: 0 0 0 2px rgba(125, 154, 215, 0.2);
+          background-color: #a2c5e6ff;
+        }
+
+        .filter-select {
+          padding: 0.5rem;
+          border: 1px solid #787c83ff;
+          border-radius: 6px;
+          font-size: 0.875rem;
+          background-color: #9ca2a8ff;
+          cursor: pointer;
+        }
+
+        .filter-select:focus {
+          outline: none;
+          border-color: #6a8eddff;
+          box-shadow: 0 0 0 2px rgba(125, 154, 215, 0.2);
+          background-color: #a2c5e6ff;
+        }
+
+        .filter-label {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #1f2937;
+          margin-right: 0.5rem;
+        }
+
+        .filter-group {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .clear-filters {
+          background: #6b7280;
+          color: white;
+          padding: 0.5rem 1rem;
+          border: none;
+          border-radius: 6px;
+          font-size: 0.875rem;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+
+        .clear-filters:hover {
+          background: #4b5563;
+        }
+
+        .results-count {
+          font-size: 0.875rem;
+          color: #6b7280;
+          margin-top: 1rem;
+        }
+
+        .event-search {
+          margin: 0.75rem 0;
+          padding: 0.5rem;
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          font-size: 0.75rem;
+          background-color: #f9fafb;
+          width: 100%;
+          box-sizing: border-box;
+        }
+
+        .event-search:focus {
+          outline: none;
+          border-color: #6a8eddff;
+          box-shadow: 0 0 0 2px rgba(125, 154, 215, 0.1);
+          background-color: white;
+        }
+
+        .event-search::placeholder {
+          color: #9ca3af;
+        }
       `}</style>
 
       <div className="header">
@@ -345,6 +509,66 @@ export default function GroupsPage() {
           + Create New Group
         </Link>
       )}
+
+      <div className="search-filters">
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="Search groups, descriptions, or events..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+          
+          <div className="filter-group">
+            <label className="filter-label">Visibility:</label>
+            <select
+              value={visibilityFilter}
+              onChange={(e) => setVisibilityFilter(e.target.value)}
+              className="filter-select"
+            >
+              <option value="all">All</option>
+              <option value="public">Public</option>
+              {user?.role === 'admin' && (
+                <>
+                  <option value="private">Private</option>
+                  <option value="hidden">Hidden</option>
+                </>
+              )}
+            </select>
+          </div>
+
+          <div className="filter-group">
+            <label className="filter-label">Sort by:</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="filter-select"
+            >
+              <option value="name">Name (A-Z)</option>
+              <option value="events">Most Events</option>
+              <option value="maxEvents">Max Events</option>
+              <option value="newest">Newest First</option>
+            </select>
+          </div>
+
+          <button
+            onClick={() => {
+              setSearchTerm("")
+              setVisibilityFilter("all")
+              setSortBy("name")
+            }}
+            className="clear-filters"
+          >
+            Clear Filters
+          </button>
+        </div>
+
+        <div className="results-count">
+          {displayGroups.length} group{displayGroups.length !== 1 ? 's' : ''} found
+          {searchTerm && ` for "${searchTerm}"`}
+        </div>
+      </div>
 
       {error && <div className="error">{error}</div>}
 
@@ -406,20 +630,41 @@ export default function GroupsPage() {
 
                 {expandedGroups.has(group.id) && (
                   <div className="events-list">
-                    {group.events.length === 0 ? (
+                    {group.events && group.events.length > 0 && (
+                      <input
+                        type="text"
+                        placeholder="Search events by title or date..."
+                        value={eventSearchTerms[group.id] || ""}
+                        onChange={(e) => updateEventSearchTerm(group.id, e.target.value)}
+                        className="event-search"
+                      />
+                    )}
+                    
+                    {!group.events || group.events.length === 0 ? (
                       <div className="no-events">No events scheduled</div>
                     ) : (
-                      group.events.map((event) => (
-                        <div key={event.id} className="event-item">
-                          <div className="event-info">
-                            <div className="event-title">{event.title}</div>
-                            <div className="event-date">{event.date}</div>
+                      (() => {
+                        const filteredEvents = filterEvents(group.events, group.id)
+                        return filteredEvents.length === 0 ? (
+                          <div className="no-events">
+                            {eventSearchTerms[group.id] 
+                              ? `No events found for "${eventSearchTerms[group.id]}"` 
+                              : "No events scheduled"}
                           </div>
-                          <div className="event-attendees">
-                            {event.attendees} attendees
-                          </div>
-                        </div>
-                      ))
+                        ) : (
+                          filteredEvents.map((event) => (
+                            <div key={event.id} className="event-item">
+                              <div className="event-info">
+                                <div className="event-title">{event.title}</div>
+                                <div className="event-date">{event.date}</div>
+                              </div>
+                              <div className="event-attendees">
+                                {event.attendees} attendees
+                              </div>
+                            </div>
+                          ))
+                        )
+                      })()
                     )}
                   </div>
                 )}
