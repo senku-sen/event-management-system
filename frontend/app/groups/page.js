@@ -1,0 +1,433 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import axios from "axios"
+
+export default function GroupsPage() {
+  const router = useRouter()
+
+  const [groups, setGroups] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  const [user, setUser] = useState(null)
+  const [expandedGroups, setExpandedGroups] = useState(new Set())
+
+
+  useEffect(() => {
+    // Get user from localStorage to check if admin
+    const userData = localStorage.getItem("user")
+    if (userData) {
+      setUser(JSON.parse(userData))
+    }
+    // Load groups from localStorage or start with empty array
+    loadGroups()
+  }, [])
+
+  const loadGroups = () => {
+    setLoading(true)
+    // Get groups from localStorage
+    const savedGroups = localStorage.getItem("groups")
+    if (savedGroups) {
+      setGroups(JSON.parse(savedGroups))
+    } else {
+      setGroups([])
+    }
+    setLoading(false)
+  }
+
+  const toggleGroupExpansion = (groupId) => {
+    const newExpanded = new Set(expandedGroups)
+    if (newExpanded.has(groupId)) {
+      newExpanded.delete(groupId)
+    } else {
+      newExpanded.add(groupId)
+    }
+    setExpandedGroups(newExpanded)
+  }
+
+  const displayGroups = groups.filter(group => {
+    // Admins see all groups, users see only public groups
+    return user?.role === 'admin' || group.visibility === 'public'
+  })
+
+  return (
+    <div className="container">
+      <style jsx>{`
+        .container {
+          display: flex;
+          flex-direction: column;
+          min-height: 100vh;
+          align-items: center;
+          justify-content: flex-start;
+          padding: 2rem 1rem;
+          background: #f8fafc;
+        }
+
+        .header {
+          text-align: center;
+          margin-bottom: 2rem;
+        }
+
+        .header-title {
+          font-size: 2rem;
+          font-weight: 600;
+          color: #1f2937;
+          margin-bottom: 0.5rem;
+        }
+
+        .header-description {
+          color: #6b7280;
+          font-size: 1rem;
+        }
+
+        .admin-badge {
+          display: inline-block;
+          background: #ef4444;
+          color: white;
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          margin-left: 0.5rem;
+        }
+
+        .create-button {
+          background: #1858e3ff;
+          color: white;
+          padding: 0.75rem 1.5rem;
+          border: none;
+          border-radius: 6px;
+          font-size: 0.875rem;
+          font-weight: 500;
+          cursor: pointer;
+          text-decoration: none;
+          display: inline-block;
+          margin-bottom: 2rem;
+          transition: background 0.2s;
+        }
+
+        .create-button:hover {
+          background: #1d4ed8;
+        }
+
+        .groups-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+          gap: 1.5rem;
+          width: 100%;
+          max-width: 1200px;
+        }
+
+        .group-card {
+          background: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(21, 34, 221, 0.81);
+          padding: 1.5rem;
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .group-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 20px rgba(21, 34, 221, 0.15);
+        }
+
+        .group-header {
+          display: flex;
+          align-items: center;
+          margin-bottom: 1rem;
+        }
+
+        .group-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 40px;
+          height: 40px;
+          background: #2563eb;
+          border-radius: 6px;
+          margin-right: 1rem;
+        }
+
+        .group-icon svg {
+          width: 20px;
+          height: 20px;
+          fill: white;
+        }
+
+        .group-info {
+          flex: 1;
+        }
+
+        .group-name {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #1f2937;
+          margin-bottom: 0.25rem;
+        }
+
+        .group-description {
+          color: #6b7280;
+          font-size: 0.875rem;
+        }
+
+        .group-meta {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+          padding: 0.75rem;
+          background: #f8fafc;
+          border-radius: 6px;
+        }
+
+        .meta-item {
+          text-align: center;
+        }
+
+        .meta-label {
+          font-size: 0.75rem;
+          color: #6b7280;
+          margin-bottom: 0.25rem;
+        }
+
+        .meta-value {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #1f2937;
+        }
+
+        .visibility-badge {
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          font-size: 0.75rem;
+          font-weight: 500;
+        }
+
+        .visibility-public {
+          background: rgba(34, 197, 94, 0.1);
+          color: #22c55e;
+        }
+
+        .visibility-private {
+          background: rgba(239, 68, 68, 0.1);
+          color: #ef4444;
+        }
+
+        .visibility-hidden {
+          background: rgba(107, 114, 128, 0.1);
+          color: #6b7280;
+        }
+
+        .events-section {
+          margin-top: 1rem;
+        }
+
+        .events-toggle {
+          background: none;
+          border: none;
+          color: #2d68e7ff;
+          font-size: 0.875rem;
+          font-weight: 500;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem 0;
+          width: 100%;
+          text-align: left;
+        }
+
+        .events-toggle:hover {
+          color: #1d4ed8;
+        }
+
+        .toggle-icon {
+          width: 16px;
+          height: 16px;
+          transition: transform 0.2s;
+        }
+
+        .toggle-icon.expanded {
+          transform: rotate(90deg);
+        }
+
+        .events-list {
+          margin-top: 0.75rem;
+          border-top: 1px solid #e5e7eb;
+          padding-top: 0.75rem;
+        }
+
+        .event-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.5rem 0;
+          border-bottom: 1px solid #f3f4f6;
+        }
+
+        .event-item:last-child {
+          border-bottom: none;
+        }
+
+        .event-info {
+          flex: 1;
+        }
+
+        .event-title {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #1f2937;
+          margin-bottom: 0.25rem;
+        }
+
+        .event-date {
+          font-size: 0.75rem;
+          color: #6b7280;
+        }
+
+        .event-attendees {
+          font-size: 0.75rem;
+          color: #6b7280;
+          background: #f3f4f6;
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+        }
+
+        .no-events {
+          text-align: center;
+          color: #6b7280;
+          font-size: 0.875rem;
+          padding: 1rem;
+          font-style: italic;
+        }
+
+        .error {
+          background: rgba(239, 68, 68, 0.1);
+          color: #ef4444;
+          padding: 1rem;
+          border-radius: 6px;
+          font-size: 0.875rem;
+          text-align: center;
+          margin-bottom: 2rem;
+        }
+
+        .loading {
+          text-align: center;
+          color: #6b7280;
+          font-size: 1rem;
+          padding: 2rem;
+        }
+
+        .empty-state {
+          text-align: center;
+          color: #6b7280;
+          font-size: 1rem;
+          padding: 3rem;
+        }
+      `}</style>
+
+      <div className="header">
+        <h1 className="header-title">
+          Groups
+          {user?.role === 'admin' && <span className="admin-badge">ADMIN</span>}
+        </h1>
+        <p className="header-description">
+          {user?.role === 'admin' 
+            ? "Manage all groups and their events" 
+            : "Discover and join public groups"}
+        </p>
+      </div>
+
+      {user?.role === 'admin' && (
+        <Link href="/groups/create" className="create-button">
+          + Create New Group
+        </Link>
+      )}
+
+      {error && <div className="error">{error}</div>}
+
+      {loading ? (
+        <div className="loading">Loading groups...</div>
+      ) : displayGroups.length === 0 ? (
+        <div className="empty-state">
+          No groups available
+        </div>
+      ) : (
+        <div className="groups-grid">
+          {displayGroups.map((group) => (
+            <div key={group.id} className="group-card">
+              <div className="group-header">
+                <div className="group-icon">
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      fill="currentColor"
+                      d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
+                    />
+                  </svg>
+                </div>
+                <div className="group-info">
+                  <h3 className="group-name">{group.name}</h3>
+                  <p className="group-description">{group.description}</p>
+                </div>
+              </div>
+
+              <div className="group-meta">
+                <div className="meta-item">
+                  <div className="meta-label">Events</div>
+                  <div className="meta-value">{group.eventCount}</div>
+                </div>
+                <div className="meta-item">
+                  <div className="meta-label">Max Events</div>
+                  <div className="meta-value">{group.maxEvents}</div>
+                </div>
+                <div className="meta-item">
+                  <div className="meta-label">Visibility</div>
+                  <div className={`visibility-badge visibility-${group.visibility}`}>
+                    {group.visibility}
+                  </div>
+                </div>
+              </div>
+
+              <div className="events-section">
+                <button
+                  className="events-toggle"
+                  onClick={() => toggleGroupExpansion(group.id)}
+                >
+                  <svg 
+                    className={`toggle-icon ${expandedGroups.has(group.id) ? 'expanded' : ''}`}
+                    viewBox="0 0 24 24"
+                  >
+                    <path fill="currentColor" d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                  </svg>
+                  {expandedGroups.has(group.id) ? 'Hide Events' : 'Show Events'} ({group.eventCount})
+                </button>
+
+                {expandedGroups.has(group.id) && (
+                  <div className="events-list">
+                    {group.events.length === 0 ? (
+                      <div className="no-events">No events scheduled</div>
+                    ) : (
+                      group.events.map((event) => (
+                        <div key={event.id} className="event-item">
+                          <div className="event-info">
+                            <div className="event-title">{event.title}</div>
+                            <div className="event-date">{event.date}</div>
+                          </div>
+                          <div className="event-attendees">
+                            {event.attendees} attendees
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}

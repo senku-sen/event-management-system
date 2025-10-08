@@ -39,19 +39,39 @@ export default function CreateGroupPage() {
     setLoading(true)
 
     try {
-      const response = await axios.post("/api/groups", {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      // Create new group object
+      const newGroup = {
+        id: Date.now(), // Simple ID generation for demo
         name: name.trim(),
         description: description.trim(),
         visibility,
         maxEvents: parseInt(maxEvents),
-      })
+        eventCount: 0,
+        events: []
+      }
 
+      // Save to localStorage
+      const existingGroups = JSON.parse(localStorage.getItem("groups") || "[]")
+      existingGroups.push(newGroup)
+      localStorage.setItem("groups", JSON.stringify(existingGroups))
+
+      console.log("Group created:", newGroup)
       setSuccess("Group created successfully!")
+      
+      // Reset form
+      setName("")
+      setDescription("")
+      setVisibility("public")
+      setMaxEvents("")
+      
       setTimeout(() => {
         router.push("/groups")
-      }, 1000)
+      }, 1500)
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to create group. Please try again.")
+      setError("Failed to create group. Please try again.")
     } finally {
       setLoading(false)
     }
