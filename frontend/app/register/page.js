@@ -267,6 +267,104 @@ export default function SignupPage() {
           text-decoration: underline;
           color: #1d4ed8;
         }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+          .container {
+            padding: 1rem 0.5rem;
+          }
+
+          .card {
+            max-width: 100%;
+            padding: 1rem;
+          }
+
+          .title {
+            font-size: 1.25rem;
+          }
+
+          .description {
+            font-size: 0.8rem;
+          }
+
+          .grid {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+          }
+
+          .form-group {
+            gap: 0.375rem;
+          }
+
+          label {
+            font-size: 0.8rem;
+          }
+
+          input {
+            padding: 0.375rem;
+            font-size: 0.8rem;
+          }
+
+          .button {
+            padding: 0.625rem;
+            font-size: 0.8rem;
+          }
+
+          .toggle-button {
+            right: 0.375rem;
+          }
+
+          .toggle-icon {
+            width: 14px;
+            height: 14px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .container {
+            padding: 0.5rem;
+          }
+
+          .card {
+            padding: 0.75rem;
+          }
+
+          .title {
+            font-size: 1.125rem;
+          }
+
+          .description {
+            font-size: 0.75rem;
+          }
+
+          .form-group {
+            gap: 0.25rem;
+          }
+
+          label {
+            font-size: 0.75rem;
+          }
+
+          input {
+            padding: 0.3125rem;
+            font-size: 0.75rem;
+          }
+
+          .button {
+            padding: 0.5rem;
+            font-size: 0.75rem;
+          }
+
+          .toggle-button {
+            right: 0.3125rem;
+            padding: 0.1875rem;
+          }
+
+          .toggle-icon {
+            width: 12px;
+            height: 12px;
+          }
+        }
       `}</style>
 
       <div className="card">

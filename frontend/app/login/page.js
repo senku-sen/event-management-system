@@ -23,6 +23,7 @@ export default function SigninPage() {
       setError("Please enter a valid email address!")
       return
     }
+
     if (!password) {
       setError("Password is required!")
       return
@@ -35,19 +36,16 @@ export default function SigninPage() {
       await new Promise(resolve => setTimeout(resolve, 1500))
       
       // Mock login - check if user exists in localStorage
-      const storedUser = localStorage.getItem("user")
+      const existingUser = localStorage.getItem("user")
       
-      if (storedUser) {
-        const userData = JSON.parse(storedUser)
+      if (existingUser) {
+        const userData = JSON.parse(existingUser)
         
-        // Simple email match for demo (in production, backend would verify password)
+        // Simple validation: check if email matches
         if (userData.email === email) {
           setSuccess("Login successful!")
+          // Keep user logged in
           localStorage.setItem("user", JSON.stringify(userData))
-          
-          // Clear form
-          setEmail("")
-          setPassword("")
           
           setTimeout(() => {
             router.push("/groups")
@@ -161,15 +159,14 @@ export default function SigninPage() {
           font-size: 0.875rem;
           width: 100%;
           box-sizing: border-box;
-          background-color: #9ca2a8ff; /* Slightly lighter on focus */
-
+          background-color: #9ca2a8ff;
         }
 
         input:focus {
           outline: none;
           border-color: #6a8eddff;
           box-shadow: 0 0 0 2px rgba(125, 154, 215, 0.2);
-          background-color: #a2c5e6ff; /* Slightly lighter on focus */
+          background-color: #a2c5e6ff;
         }
 
         .button {
@@ -208,6 +205,80 @@ export default function SigninPage() {
         .link:hover {
           text-decoration: underline;
         }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+          .container {
+            padding: 1rem 0.5rem;
+          }
+
+          .card {
+            max-width: 100%;
+            padding: 1rem;
+          }
+
+          .title {
+            font-size: 1.25rem;
+          }
+
+          .description {
+            font-size: 0.8rem;
+          }
+
+          .form-group {
+            gap: 0.375rem;
+          }
+
+          label {
+            font-size: 0.8rem;
+          }
+
+          input {
+            padding: 0.375rem;
+            font-size: 0.8rem;
+          }
+
+          .button {
+            padding: 0.625rem;
+            font-size: 0.8rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .container {
+            padding: 0.5rem;
+          }
+
+          .card {
+            padding: 0.75rem;
+          }
+
+          .title {
+            font-size: 1.125rem;
+          }
+
+          .description {
+            font-size: 0.75rem;
+          }
+
+          .form-group {
+            gap: 0.25rem;
+          }
+
+          label {
+            font-size: 0.75rem;
+          }
+
+          input {
+            padding: 0.3125rem;
+            font-size: 0.75rem;
+          }
+
+          .button {
+            padding: 0.5rem;
+            font-size: 0.75rem;
+          }
+        }
       `}</style>
 
       <div className="card">
@@ -219,7 +290,7 @@ export default function SigninPage() {
           </div>
           <div>
             <h2 className="title">Welcome back</h2>
-            <p className="description">Sign in to your library account</p>
+            <p className="description">Sign in to your account</p>
           </div>
         </div>
         <form onSubmit={handleSubmit} className="form">

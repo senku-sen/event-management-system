@@ -527,6 +527,144 @@ export default function GroupsPage() {
           margin-top: 1rem;
         }
 
+        .groups-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+          gap: 1.5rem;
+          width: 100%;
+          max-width: 1200px;
+        }
+
+        .group-card {
+          background: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(21, 34, 221, 0.81);
+          padding: 1.5rem;
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .group-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 20px rgba(21, 34, 221, 0.15);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+          .container {
+            padding: 1rem 0.5rem;
+          }
+
+          .header {
+            margin-bottom: 1.5rem;
+          }
+
+          .header-title {
+            font-size: 1.75rem;
+          }
+
+          .search-filters {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+          }
+
+          .search-bar {
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: stretch;
+          }
+
+          .search-input {
+            min-width: auto;
+            width: 100%;
+          }
+
+          .filter-group {
+            justify-content: space-between;
+          }
+
+          .filter-label {
+            margin-right: 0;
+            font-size: 0.8rem;
+          }
+
+          .groups-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+          }
+
+          .group-card {
+            padding: 1rem;
+          }
+
+          .group-header {
+            flex-direction: column;
+            text-align: center;
+          }
+
+          .group-icon {
+            margin-bottom: 1rem;
+          }
+
+          .group-meta {
+            flex-direction: column;
+            gap: 0.75rem;
+            text-align: center;
+          }
+
+          .meta-item {
+            padding: 0.5rem;
+          }
+
+          .group-actions {
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+
+          .action-buttons {
+            flex-direction: column;
+            gap: 0.75rem;
+          }
+
+          .create-button,
+          .refresh-button {
+            width: 100%;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .container {
+            padding: 0.5rem;
+          }
+
+          .header-title {
+            font-size: 1.5rem;
+          }
+
+          .search-filters {
+            padding: 0.75rem;
+          }
+
+          .group-card {
+            padding: 0.75rem;
+          }
+
+          .group-name {
+            font-size: 1.1rem;
+          }
+
+          .group-description {
+            font-size: 0.8rem;
+          }
+
+          .meta-label {
+            font-size: 0.7rem;
+          }
+
+          .meta-value {
+            font-size: 0.75rem;
+          }
+        }
+
         .event-search {
           margin: 0.75rem 0;
           padding: 0.5rem;
