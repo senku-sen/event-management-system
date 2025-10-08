@@ -8,7 +8,9 @@ import {
   resetUserPassword,
 } from "../controllers/userController.js";
 import { validateRegister, validateLogin, validateRoleChange, validatePasswordReset } from "../validators/userValidator.js";
-import authMiddleware from "../middleware/authMiddleware.js";
+import { authMiddleware, adminMiddleware } from '../middleware/authMiddleware.js';
+
+
 
 
 
