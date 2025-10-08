@@ -94,9 +94,12 @@ const getEventById = async (id) => {
   }
 };
 
-// [EVENT-04] Update event with authorization check
+// [EVENT-04] Update event with authorization check (Regular users: own events only, Admins: any event)
 const updateEvent = async (id, updateData, userId, isAdmin) => {
   try {
+    console.log("🟢 Attempting to update event:", { id, userId, isAdmin });
+    
+    // 1. Check if event exists
     const event = await Event.findById(id);
     
     if (!event) {
@@ -105,22 +108,40 @@ const updateEvent = async (id, updateData, userId, isAdmin) => {
       throw error;
     }
 
-    // Authorization check
+    // 2. Authorization check
     if (!isAdmin && event.createdBy.toString() !== userId) {
+      console.log("❌ Authorization failed:", {
+        isAdmin,
+        eventCreator: event.createdBy.toString(),
+        requestingUser: userId
+      });
       const error = new Error("Unauthorized: You can only edit your own events");
       error.statusCode = 403;
       throw error;
     }
 
-    // Validate dates if they're being updated
+    // 3. Validate dates if they're being updated
     if (updateData.startDate && updateData.endDate) {
       if (new Date(updateData.endDate) <= new Date(updateData.startDate)) {
         const error = new Error("End date must be after start date");
         error.statusCode = 400;
         throw error;
       }
+    } else if (updateData.endDate && event.startDate) {
+      if (new Date(updateData.endDate) <= new Date(event.startDate)) {
+        const error = new Error("End date must be after start date");
+        error.statusCode = 400;
+        throw error;
+      }
+    } else if (updateData.startDate && event.endDate) {
+      if (new Date(event.endDate) <= new Date(updateData.startDate)) {
+        const error = new Error("End date must be after start date");
+        error.statusCode = 400;
+        throw error;
+      }
     }
-
+    
+    // 4. Update the event
     const updatedEvent = await Event.findByIdAndUpdate(
       id,
       { 
@@ -133,16 +154,20 @@ const updateEvent = async (id, updateData, userId, isAdmin) => {
       select: 'name email'
     });
 
+    console.log("✅ Event updated successfully:", updatedEvent);
     return updatedEvent;
   } catch (error) {
-    console.error("Error updating event: ", error);
+    console.error("❌ Error updating event:", error);
     throw error;
   }
 };
 
-// [EVENT-05] Delete event with authorization check
+
 const deleteEvent = async (id, userId, isAdmin) => {
   try {
+    console.log("🟢 Attempting to delete event:", { id, userId, isAdmin });
+
+    // 1. Check if event exists
     const event = await Event.findById(id);
     
     if (!event) {
@@ -151,8 +176,13 @@ const deleteEvent = async (id, userId, isAdmin) => {
       throw error;
     }
 
-    // Authorization check
+    // 2. Authorization check
     if (!isAdmin && event.createdBy.toString() !== userId) {
+      console.log("❌ Authorization failed:", {
+        isAdmin,
+        eventCreator: event.createdBy.toString(),
+        requestingUser: userId
+      });
       const error = new Error("Unauthorized: You can only delete your own events");
       error.statusCode = 403;
       throw error;
@@ -166,7 +196,7 @@ const deleteEvent = async (id, userId, isAdmin) => {
   }
 };
 
-// [EVENT-06] Get events by user ID
+
 const getEventsByUser = async (userId) => {
   try {
     return await Event.find({ createdBy: userId })
