@@ -32,7 +32,7 @@ export default function SigninPage() {
     setLoading(true)
 
     try {
-      const response = await axios.post("/api/auth/login", {
+      const response = await api.post("/auth/login", {
         email,
         password,
       })
@@ -40,7 +40,7 @@ export default function SigninPage() {
       setSuccess("Login successful!")
       localStorage.setItem("user", JSON.stringify(response.data))
       setTimeout(() => {
-        router.push("/books")
+        router.push("/profile")
       }, 1000)
     } catch (err) {
       setError(err.response?.data?.error || "Login failed. Please check your credentials.")
