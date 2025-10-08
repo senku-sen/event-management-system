@@ -42,7 +42,7 @@ export default function EventForm() {
         category: "",
         maxAttendees: "",
       });
-      setTimeout(() => router.push("/events"), 1000);
+      setTimeout(() => router.push("/eventlist"), 1000);
     } catch (err) {
       setError(err.response?.data?.error || "Failed to create event.");
     } finally {
@@ -85,7 +85,7 @@ export default function EventForm() {
           border-radius: 8px;
           margin: 0 auto 1rem;
         }
-          
+
         .title {
           font-size: 1.5rem;
           font-weight: 600;
@@ -190,9 +190,10 @@ export default function EventForm() {
             <p className="description">Add a new event to your schedule</p>
           </div>
         </div>
+        {loading && <div className="description">Creating event...</div>}
+        {error && <div className="error">{error}</div>}
+        {success && <div className="success">{success}</div>}
         <form onSubmit={handleSubmit} className="form">
-          {error && <div className="error">{error}</div>}
-          {success && <div className="success">{success}</div>}
           <div className="form-group">
             <label htmlFor="title">Title</label>
             <input

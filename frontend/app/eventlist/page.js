@@ -38,9 +38,23 @@ export default function EventList() {
     }
   };
 
-  const handleEdit = (eventId) => {
+  const handleEdit = (eventId, userId) => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const isAdmin = user.role === "admin";
+    if (!isAdmin && user.id !== userId) {
+      setError("You can only edit your own events.");
+      return;
+    }
     router.push(`/event/edit/${eventId}`);
   };
+
+    if (loading) return (
+    <div className="container">
+      <div className="card">
+        <div className="description">Loading events...</div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="container">
@@ -182,25 +196,35 @@ export default function EventList() {
             <p className="description">Manage your scheduled events</p>
           </div>
         </div>
-        {loading && <div className="prompt">Loading...</div>}
-        {error && <div className="error">{error} <a href="/eventlist">Try again</a></div>}
-        {!loading && !error && events.length === 0 && <div className="prompt">No events found.</div>}
-        {!loading && !error && events.length > 0 && (
-          <div className="event-list">
-            {events.map((event) => (
-              <div key={event.id} className="event-item">
-                <div className="event-title">{event.title}</div>
-                <div className="event-details">
-                  {event.dates} | {event.location} | {event.category} | Max: {event.maxAttendees}
-                </div>
-                <div className="button-group">
-                  <button className="edit-btn" onClick={() => handleEdit(event.id)}>Edit</button>
-                  <button className="delete-btn" onClick={() => handleDelete(event.id)}>Delete</button>
-                </div>
+        {loading && <div className="description">Loading events...</div>}
+        {error && <div className="error">{error}</div>}
+        <div className="event-list">
+          {events.length === 0 && !loading && !error && (
+            <p className="description">No events found.</p>
+          )}
+          {events.map((event) => (
+            <div key={event.id} className="event-item">
+              <div className="event-title">{event.title}</div>
+              <div className="event-details">
+                {event.dates} | {event.location} | {event.category} | Max: {event.maxAttendees}
               </div>
-            ))}
-          </div>
-        )}
+              <div className="button-group">
+                <button
+                  className="edit-btn"
+                  onClick={() => handleEdit(event.id, event.userId)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="delete-btn"
+                  onClick={() => handleDelete(event.id, event.userId)}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
