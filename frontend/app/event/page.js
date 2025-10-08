@@ -85,17 +85,16 @@ export default function EventForm() {
           border-radius: 8px;
           margin: 0 auto 1rem;
         }
-
-        .icon {
-          width: 24px;
-          height: 24px;
-          fill: white;
-        }
-
+          
         .title {
           font-size: 1.5rem;
           font-weight: 600;
           margin-bottom: 0.5rem;
+        }
+        .icon {
+          width: 24px;
+          height: 24px;
+          fill: white;
         }
 
         .description {
