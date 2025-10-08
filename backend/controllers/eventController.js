@@ -1,4 +1,4 @@
-import eventServices from "../services/eventServices";
+import eventServices from "../services/eventServices.js";
 
 // GET /api/events - Get events (Users see own; Admins see all)
 export const getEvents = async (req, res) => {
