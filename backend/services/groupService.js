@@ -50,4 +50,32 @@ const getAllGroup = async (user) => {
 };
 
 
+const deleteGroup = async (groupId) => {
+    try {
+        const group = await Group.findByIdAndDelete(groupId);
+        return group;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
+const updateGroup = async (groupId, groupData) => {
+    try {
+        const group = await Group.findByIdAndUpdate(groupId, groupData, { new: true });
+        return group;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
+const searchGroupById = async (groupId) => {
+    try {
+        const group = await Group.findById(groupId);
+        return group;
+    } catch (error) {
+        throw error;
+    }
+};
 
