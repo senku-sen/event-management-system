@@ -6,6 +6,7 @@ import {
   listUsers,
   updateUserRole,
   resetUserPassword,
+  registerAdmin,
 } from "../controllers/userController.js";
 import { validateRegister, validateLogin, validateRoleChange, validatePasswordReset } from "../validators/userValidator.js";
 import { authMiddleware, adminMiddleware } from '../middleware/authMiddleware.js';
@@ -19,6 +20,9 @@ const router = express.Router();
 // Public routes
 router.post("/register", validateRegister, registerUser);
 router.post("/login", validateLogin, loginUser);
+
+// TEMPORARY: Admin registration (remove after creating admin)
+router.post("/register-admin", validateRegister, registerAdmin);
 
 // Protected routes (require authentication)
 router.get("/profile", authMiddleware, getProfile);
