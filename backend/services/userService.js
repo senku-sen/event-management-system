@@ -1,11 +1,7 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-
-// Ensure JWT_SECRET is set
-if (!process.env.JWT_SECRET) {
-  throw new Error("JWT_SECRET environment variable is required");
-}
+import config from "../config/env.js";
 
 export default {
   // USR-05: List users (no password)
@@ -45,7 +41,7 @@ export default {
       if (!ok) throw new Error("Invalid credentials");
 
       const payload = { id: user._id, email, firstName: user.firstName, lastName: user.lastName, role: user.role };
-      const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+      const token = jwt.sign(payload, config.JWT_SECRET, { expiresIn: "1h" });
       return { token, user: payload };
     } catch (error) {
       throw new Error("Authentication failed");
