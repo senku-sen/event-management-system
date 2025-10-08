@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import axios from "axios"
+import { getAuthHeaders } from "../lib/auth"
 
 export default function GroupsPage() {
   const router = useRouter()
@@ -173,7 +174,7 @@ export default function GroupsPage() {
         .container {
           display: flex;
           flex-direction: column;
-          min-height: 100vh;
+          min-height: calc(100vh - 4rem);
           align-items: center;
           justify-content: flex-start;
           padding: 2rem 1rem;

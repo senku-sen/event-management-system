@@ -68,7 +68,7 @@ export default function SigninPage() {
       <style jsx>{`
         .container {
           display: flex;
-          min-height: 100vh;
+          min-height: calc(100vh - 4rem);
           align-items: center;
           justify-content: center;
           padding: 1rem;
