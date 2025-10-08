@@ -79,3 +79,25 @@ export const resetUserPassword = async (req, res) => {
   }
 };
 
+// TEMPORARY: Admin registration endpoint (remove after creating admin)
+export const registerAdmin = async (req, res) => {
+  try {
+    const { email, password, firstName, lastName, phone, address } = req.body;
+
+    const createdUser = await userService.register({
+      email,
+      password,
+      firstName,
+      lastName,
+      phone,
+      address,
+      role: "Admin", // Force admin role
+    });
+
+    return sendSuccess(res, 201, "Admin registered", { user: createdUser });
+  } catch (err) {
+    if (err?.code === 11000) return sendError(res, 409, "Duplicate key", err);
+    return sendError(res, 500, "Admin registration failed", { message: err?.message });
+  }
+};
+

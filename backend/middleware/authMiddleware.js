@@ -1,22 +1,34 @@
+import jwt from "jsonwebtoken";
+
 const authMiddleware = (req, res, next) => {
     try {
-        // Get user from session, JWT token, or however you're handling auth
-        // This is a basic example - adjust based on your auth strategy
+        const authHeader = req.header('Authorization');
         
-        const user = req.user; // Assuming you set req.user somewhere (e.g., passport, JWT middleware)
-        
-        if (!user) {
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({
                 success: false,
-                message: 'Authentication required'
+                message: 'Access denied. No token provided.'
             });
         }
+
+        const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+        
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: 'Access denied. No token provided.'
+            });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded; // Contains { id, email, firstName, lastName, role }
+        req.user.isAdmin = decoded.role === 'Admin';
         
         next();
     } catch (error) {
         return res.status(401).json({
             success: false,
-            message: 'Invalid authentication'
+            message: 'Invalid token'
         });
     }
 };
@@ -32,7 +44,7 @@ const adminMiddleware = (req, res, next) => {
             });
         }
         
-        if (user.role !== 'admin') {
+        if (user.role !== 'Admin') {
             return res.status(403).json({
                 success: false,
                 message: 'Admin access required'
