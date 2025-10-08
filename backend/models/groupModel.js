@@ -1,52 +1,52 @@
-// [GRP-01] Create Group model with fields: 
-// id, name, description, createdBy, visibility (enum: ‘public’, ‘private’), 
-// maxEvents, createdAt, updatedAt.
-
-
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const groupSchema = new mongoose.Schema({
-  name : {
-    type: String,
-    required: true,
-  },
-  
-  description : {
-    type: string,
-    required :  true,
+    title: {
+        type: String,
+        required: true,
+    },
+    description: {
+        type: String,
+        required: true,
+    },
+    startDate: {
+        type: Date,
+        required: true,
+    },
+    endDate: {
+        type: Date,
+        required: true,
+    },
+    location: {
+        type: String,
+        required: true,
+    },
+    status: {
+        type: String,
+        enum: ['upcoming', 'ongoing', 'completed'],
+        default: 'upcoming',
+        required: true,
+    },
+    category: {
+        type: String,
+        enum: ['conference', 'workshop', 'webinar', 'meetup'],
+        required: true,
+    },
+    maxAttendees: {
+        type: Number,
+        required: true,
+    },
+    createdBy: {
+        type: Date, 
+        default: Date.now,
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now,
+    },
+}, { timestamps: true, } 
+);
 
-  },
+const Group = mongoose.model('Group', eventSchema);
 
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-
-  visibility: {
-    type: String,
-    enum: ['public', 'private'],
-    default: 'public',
-  },
-
-  maxEvents: {
-    type: Number,
-    default: 10,
-  },
-
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
-
-
-})
-
-const group = mongoose.model('Group', groupSchema);
-
-export default group;
+export default Group;
