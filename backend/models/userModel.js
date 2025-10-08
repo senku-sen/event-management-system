@@ -1,13 +1,16 @@
 import mongoose from "mongoose";
 
-    const userSchema = new mongoose.Schema({
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    role: { type: String, enum: ["User", "Admin"],default: "User"},
-    firstName: { type: String, required: true, unique: true },
-    lastName: { type: String, required: true, unique: true },
-    phone: { type: String, required: true, match: [ /^(?:\+63|0)9\d{9}$/, "Please enter a valid Philippine mobile number"],  },
-    address: { type: String, required: true },
-    }, { timestamps: true });
+const userSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true, trim: true },
+  password: { type: String, required: true },
+  firstName: { type: String, required: true, trim: true },
+  lastName: { type: String, required: true, trim: true },
+  phone: { type: String, required: true, trim: true },
+  address: { type: String, required: true, trim: true },
+  role: { type: String, enum: ["user", "admin"], default: "user" },
+});
+
+// Index for faster email lookups
+userSchema.index({ email: 1 }, { unique: true });
 
 export default mongoose.model("User", userSchema);

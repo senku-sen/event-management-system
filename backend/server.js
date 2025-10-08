@@ -1,19 +1,18 @@
-import dotenv from "dotenv";
+import config from "./config/env.js";
 import cors from "cors";
 import express from "express";
 import { connectDB } from "./config/db.js";
-
 import groupRoute from "./routes/groupRoute.js";
 import userRoute from "./routes/userRoute.js";
 
-
-dotenv.config();
+// Debug: Confirm environment variables
+console.log("JWT_SECRET:", config.JWT_SECRET ? "loaded" : "not set");
+console.log("MONGO_URI:", config.MONGO_URI ? "loaded" : "not set");
+console.log("PORT:", config.PORT);
 
 const app = express();
 
-
 app.use(express.json());
-
 app.use(cors());
 
 app.use("/api/groups", groupRoute);
@@ -21,10 +20,8 @@ app.use("/api/users", userRoute);
 
 connectDB();
 
-const PORT = process.env.PORT || 3000;
+const PORT = config.PORT;
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 export default app;
-
-
