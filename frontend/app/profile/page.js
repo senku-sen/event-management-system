@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-//import api from "../../lib/api"; // Adjust path
+import Link from "next/link"
+import axios from "axios"
 
 
 export default function ProfilePage() {

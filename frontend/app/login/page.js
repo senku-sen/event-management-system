@@ -32,7 +32,7 @@ export default function SigninPage() {
     setLoading(true)
 
     try {
-      const response = await api.post("/auth/login", {
+       const response = await axios.post("http://localhost:3000/api/users/register", {
         email,
         password,
       })
