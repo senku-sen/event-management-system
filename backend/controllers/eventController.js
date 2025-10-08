@@ -1,9 +1,16 @@
 import eventServices from "../services/eventServices";
 
-// Get all events with filtering by user role
+// GET /api/events - Get events (Users see own; Admins see all)
 export const getEvents = async (req, res) => {
   try {
-    const events = await eventServices.getEvents();
+    let events;
+    // If admin, get all events, otherwise get only user's events
+    if (req.user.isAdmin) {
+      events = await eventServices.getEvents();
+    } else {
+      events = await eventServices.getEventsByUser(req.user.id);
+    }
+    
     res.status(200).json({
       success: true,
       count: events.length,
