@@ -28,21 +28,37 @@ export default function GroupsPage() {
     const userData = localStorage.getItem("user")
     if (userData) {
       setUser(JSON.parse(userData))
+      // Load groups from API
+      loadGroups()
+    } else {
+      setError("Please log in to view groups")
+      setLoading(false)
     }
-    // Load groups from localStorage or start with empty array
-    loadGroups()
   }, [])
 
-  const loadGroups = () => {
-    setLoading(true)
-    // Get groups from localStorage
-    const savedGroups = localStorage.getItem("groups")
-    if (savedGroups) {
-      setGroups(JSON.parse(savedGroups))
-    } else {
-      setGroups([])
+  const loadGroups = async () => {
+    try {
+      setLoading(true)
+      setError("")
+
+      // Get user data (should be available from useEffect)
+      const userData = localStorage.getItem("user")
+      if (!userData) {
+        setError("Please log in to view groups")
+        setLoading(false)
+        return
+      }
+
+      const currentUser = JSON.parse(userData)
+      const headers = getAuthHeaders(currentUser)
+      const response = await axios.get("/api/groups", { headers })
+      setGroups(response.data)
+    } catch (err) {
+      console.error('Error loading groups:', err)
+      setError(err.response?.data?.error || "Failed to load groups")
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   const toggleGroupExpansion = (groupId) => {
@@ -127,17 +143,16 @@ export default function GroupsPage() {
     setError("")
 
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      const updatedGroups = groups.filter(group => group.id !== groupId)
-      setGroups(updatedGroups)
-      localStorage.setItem("groups", JSON.stringify(updatedGroups))
-      
+      const headers = getAuthHeaders(user)
+      await axios.delete(`/api/groups?id=${groupId}`, { headers })
+
+      // Remove from local state
+      setGroups(groups.filter(group => group.id !== groupId))
       setSuccessMessage("Group deleted successfully")
       setTimeout(() => setSuccessMessage(""), 3000)
     } catch (err) {
-      setError("Failed to delete group. Please try again.")
+      console.error('Error deleting group:', err)
+      setError(err.response?.data?.error || "Failed to delete group. Please try again.")
     } finally {
       setDeleteLoading(prev => ({ ...prev, [groupId]: false }))
     }

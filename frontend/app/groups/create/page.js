@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import axios from "axios"
+import { getAuthHeaders } from "../../lib/auth"
 
 export default function CreateGroupPage() {
   const router = useRouter()
@@ -23,7 +24,7 @@ export default function CreateGroupPage() {
     if (userData) {
       const parsedUser = JSON.parse(userData)
       setUser(parsedUser)
-      
+
       // Redirect non-admins
       if (parsedUser.role !== 'admin') {
         setError("Access denied. Only administrators can create groups.")
@@ -62,39 +63,33 @@ export default function CreateGroupPage() {
     setLoading(true)
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      // Create new group object
-      const newGroup = {
-        id: Date.now(), // Simple ID generation for demo
+      if (!user) {
+        setError("Authentication required")
+        return
+      }
+
+      const headers = getAuthHeaders(user)
+      const response = await axios.post("/api/groups", {
         name: name.trim(),
         description: description.trim(),
         visibility,
         maxEvents: parseInt(maxEvents),
-        eventCount: 0,
-        events: []
-      }
+      }, { headers })
 
-      // Save to localStorage
-      const existingGroups = JSON.parse(localStorage.getItem("groups") || "[]")
-      existingGroups.push(newGroup)
-      localStorage.setItem("groups", JSON.stringify(existingGroups))
-
-      console.log("Group created:", newGroup)
       setSuccess("Group created successfully!")
-      
+
       // Reset form
       setName("")
       setDescription("")
       setVisibility("public")
       setMaxEvents("")
-      
+
       setTimeout(() => {
         router.push("/groups")
       }, 1500)
     } catch (err) {
-      setError("Failed to create group. Please try again.")
+      console.error('Error creating group:', err)
+      setError(err.response?.data?.error || "Failed to create group. Please try again.")
     } finally {
       setLoading(false)
     }

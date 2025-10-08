@@ -34,27 +34,27 @@ export default function SigninPage() {
     try {
       // Simulate API call for now - replace with actual API when backend is ready
       await new Promise(resolve => setTimeout(resolve, 1500))
-      
+
       // Mock login - check if user exists in localStorage
-      const existingUser = localStorage.getItem("user")
-      
-      if (existingUser) {
-        const userData = JSON.parse(existingUser)
-        
-        // Simple validation: check if email matches
-        if (userData.email === email) {
-          setSuccess("Login successful!")
-          // Keep user logged in
-          localStorage.setItem("user", JSON.stringify(userData))
-          
-          setTimeout(() => {
-            router.push("/groups")
-          }, 1500)
-        } else {
-          setError("Invalid email or password. Please try again.")
-        }
+      const registeredUsers = JSON.parse(localStorage.getItem("registeredUsers") || "[]")
+      const user = registeredUsers.find(u => u.email === email)
+
+      if (user) {
+        // Store authenticated user
+        localStorage.setItem("user", JSON.stringify({
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role || 'user'
+        }))
+
+        setSuccess("Login successful!")
+        setTimeout(() => {
+          router.push("/groups")
+        }, 1500)
       } else {
-        setError("No account found. Please register first.")
+        setError("Invalid email or password. Please try again.")
       }
     } catch (err) {
       setError("Login failed. Please check your credentials.")

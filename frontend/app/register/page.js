@@ -68,9 +68,13 @@ export default function SignupPage() {
         createdAt: new Date().toISOString()
       }
 
+      // Store in registered users
+      const existingUsers = JSON.parse(localStorage.getItem("registeredUsers") || "[]")
+      existingUsers.push(userData)
+      localStorage.setItem("registeredUsers", JSON.stringify(existingUsers))
+
       setSuccess("Account created successfully!")
-      localStorage.setItem("user", JSON.stringify(userData))
-      
+
       // Reset form
       setEmail("")
       setPassword("")
@@ -78,7 +82,7 @@ export default function SignupPage() {
       setFirstName("")
       setLastName("")
       setPhone("")
-      
+
       setTimeout(() => {
         router.push("/login")
       }, 1500)
