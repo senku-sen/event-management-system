@@ -4,7 +4,6 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import axios from "axios"
-//import api from '../../lib/api';
 
 export default function SignupPage() {
   const router = useRouter()
@@ -15,6 +14,8 @@ export default function SignupPage() {
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [phone, setPhone] = useState("")
+  const [address, setAddress] = useState("")
+  const [role, setRole] = useState("User")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [loading, setLoading] = useState(false)
@@ -51,22 +52,29 @@ export default function SignupPage() {
       return
     }
 
+    if (!address) {
+      setError("Address is required!")
+      return
+    }
+
     setLoading(true)
 
     try {
-      const response = await api.post("/auth/register", {
+      const response = await axios.post("http://localhost:3000/api/users/register", {
         email,
         password,
         firstName,
         lastName,
         phone,
+        role,
+        address,
       })
 
       setSuccess("Account created successfully!")
-      localStorage.setItem("user", JSON.stringify(response.data))
+      
       setTimeout(() => {
         router.push("/login")
-      }, 1000)
+      }, 2000)
     } catch (err) {
       setError(err.response?.data?.error || "Registration failed. Please try again.")
     } finally {
@@ -180,15 +188,19 @@ export default function SignupPage() {
           font-size: 0.875rem;
           width: 100%;
           box-sizing: border-box;
-          background-color: #9ca2a8ff; /* Slightly lighter on focus */
-
+          background-color: #9ca2a8ff;
         }
 
         input:focus {
           outline: none;
           border-color: #6a8eddff;
           box-shadow: 0 0 0 2px rgba(125, 154, 215, 0.2);
-          background-color: #a2c5e6ff; /* Slightly lighter on focus */
+          background-color: #a2c5e6ff;
+        }
+
+        input:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
         }
 
         .toggle-button {
@@ -205,13 +217,18 @@ export default function SignupPage() {
           justify-content: center;
         }
 
+        .toggle-button:disabled {
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+
         .toggle-icon {
           width: 16px;
           height: 16px;
           fill: #6b7280;
         }
 
-        .toggle-button:hover .toggle-icon {
+        .toggle-button:hover:not(:disabled) .toggle-icon {
           fill: #425a8eff;
         }
 
@@ -273,22 +290,59 @@ export default function SignupPage() {
           <div className="grid">
             <div className="form-group">
               <label htmlFor="firstName">First Name</label>
-              <input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+              <input 
+                id="firstName" 
+                value={firstName} 
+                onChange={(e) => setFirstName(e.target.value)} 
+                required 
+                disabled={loading}
+              />
             </div>
             <div className="form-group">
               <label htmlFor="lastName">Last Name</label>
-              <input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+              <input 
+                id="lastName" 
+                value={lastName} 
+                onChange={(e) => setLastName(e.target.value)} 
+                required 
+                disabled={loading}
+              />
             </div>
           </div>
 
           <div className="form-group">
             <label htmlFor="email">Email</label>
-            <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <input 
+              id="email" 
+              type="email" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)} 
+              required 
+              disabled={loading}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="address">Address</label>
+            <input
+              id="address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              required
+              disabled={loading}
+            />
           </div>
 
           <div className="form-group">
             <label htmlFor="phone">Phone</label>
-            <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+            <input 
+              id="phone" 
+              type="tel" 
+              value={phone} 
+              onChange={(e) => setPhone(e.target.value)} 
+              required 
+              disabled={loading}
+            />
           </div>
 
           <div className="form-group">
@@ -300,11 +354,13 @@ export default function SignupPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={loading}
               />
               <button
                 type="button"
                 className="toggle-button"
                 onClick={() => setShowPassword(!showPassword)}
+                disabled={loading}
               >
                 <svg className="toggle-icon" viewBox="0 0 24 24">
                   {showPassword ? (
@@ -332,11 +388,13 @@ export default function SignupPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
+                disabled={loading}
               />
               <button
                 type="button"
                 className="toggle-button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                disabled={loading}
               >
                 <svg className="toggle-icon" viewBox="0 0 24 24">
                   {showConfirmPassword ? (

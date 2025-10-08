@@ -1,5 +1,4 @@
 import userService from "../services/userService.js";
-import { validateRegister, validateLogin, validateRoleChange, validatePasswordReset } from "../validators/userValidator.js";
 
 // Simplified success response
 const sendSuccess = (res, data, status = 200, message = "Success") => {
@@ -79,3 +78,4 @@ export const resetUserPassword = async (req, res) => {
     sendError(res, err.message === "User not found" ? "User not found" : "Failed to reset password", err.message === "User not found" ? 404 : 500);
   }
 };
+
