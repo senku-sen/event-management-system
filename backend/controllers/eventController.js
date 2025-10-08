@@ -23,8 +23,16 @@ export const getEvents = async (req, res) => {
 export const createEvent = async (req, res) => {
   try {
     console.log("🟢 Received body:", req.body);
+    const { title, description, startDate, endDate, location, category, maxAttendees } = req.body;
+    
     const eventData = {
-      ...req.body,
+      title,
+      description,
+      startDate,
+      endDate,
+      location,
+      category,
+      maxAttendees,
       userId: req.user.id // From auth middleware
     };
 
