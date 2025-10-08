@@ -541,6 +541,35 @@ export default function GroupsPage() {
           font-size: 0.875rem;
           color: #6b7280;
           margin-top: 1rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+        }
+
+        .refresh-button-inline {
+          background: #10b981;
+          color: white;
+          padding: 0.375rem 0.75rem;
+          border: none;
+          border-radius: 4px;
+          font-size: 0.75rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: background 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+
+        .refresh-button-inline:hover:not(:disabled) {
+          background: #059669;
+        }
+
+        .refresh-button-inline:disabled {
+          background: #9ca3af;
+          cursor: not-allowed;
         }
 
         .groups-grid {
@@ -636,14 +665,13 @@ export default function GroupsPage() {
             gap: 0.5rem;
           }
 
-          .action-buttons {
-            flex-direction: column;
-            gap: 0.75rem;
+          .create-button {
+            width: 100%;
           }
 
-          .create-button,
-          .refresh-button {
-            width: 100%;
+          .refresh-button-inline {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
           }
         }
 
@@ -729,36 +757,6 @@ export default function GroupsPage() {
           100% { transform: rotate(360deg); }
         }
 
-        .action-buttons {
-          display: flex;
-          gap: 0.5rem;
-          margin-bottom: 1rem;
-          flex-wrap: wrap;
-        }
-
-        .refresh-button {
-          background: #10b981;
-          color: white;
-          padding: 0.5rem 1rem;
-          border: none;
-          border-radius: 6px;
-          font-size: 0.875rem;
-          font-weight: 500;
-          cursor: pointer;
-          transition: background 0.2s;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .refresh-button:hover:not(:disabled) {
-          background: #059669;
-        }
-
-        .refresh-button:disabled {
-          background: #9ca3af;
-          cursor: not-allowed;
-        }
 
         .group-actions {
           display: flex;
@@ -847,34 +845,17 @@ export default function GroupsPage() {
         </p>
       </div>
 
-      <div className="action-buttons">
-        {user?.role === 'admin' ? (
-          <Link href="/groups/create" className="create-button">
-            + Create New Group
-          </Link>
-        ) : (
-          <div className="role-restriction">
-            👤 Only administrators can create groups
-          </div>
-        )}
-        
-        <button
-          onClick={refreshGroups}
-          disabled={actionLoading}
-          className="refresh-button"
-        >
-          {actionLoading ? (
-            <>
-              <div className="spinner"></div>
-              Refreshing...
-            </>
-          ) : (
-            <>
-              🔄 Refresh Groups
-            </>
-          )}
-        </button>
-      </div>
+      {user?.role === 'admin' && (
+        <Link href="/groups/create" className="create-button">
+          + Create New Group
+        </Link>
+      )}
+
+      {!user?.role && (
+        <div className="role-restriction">
+          Please log in to view and manage groups
+        </div>
+      )}
 
       <div className="search-filters">
         <div className="search-bar">
@@ -933,6 +914,24 @@ export default function GroupsPage() {
         <div className="results-count">
           {displayGroups.length} group{displayGroups.length !== 1 ? 's' : ''} found
           {searchTerm && ` for "${searchTerm}"`}
+          
+          <button
+            onClick={refreshGroups}
+            disabled={actionLoading}
+            className="refresh-button-inline"
+            title="Refresh groups"
+          >
+            {actionLoading ? (
+              <>
+                <div className="spinner"></div>
+                Refreshing...
+              </>
+            ) : (
+              <>
+                🔄 Refresh
+              </>
+            )}
+          </button>
         </div>
       </div>
 
