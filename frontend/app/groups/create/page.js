@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import axios from "axios"
@@ -15,6 +15,29 @@ export default function CreateGroupPage() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [loading, setLoading] = useState(false)
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    // Check user role on component mount
+    const userData = localStorage.getItem("user")
+    if (userData) {
+      const parsedUser = JSON.parse(userData)
+      setUser(parsedUser)
+      
+      // Redirect non-admins
+      if (parsedUser.role !== 'admin') {
+        setError("Access denied. Only administrators can create groups.")
+        setTimeout(() => {
+          router.push("/groups")
+        }, 2000)
+      }
+    } else {
+      setError("Please log in to access this page.")
+      setTimeout(() => {
+        router.push("/login")
+      }, 2000)
+    }
+  }, [])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -275,6 +298,22 @@ export default function CreateGroupPage() {
           font-weight: 600;
           margin-left: 0.5rem;
         }
+
+        .spinner {
+          width: 16px;
+          height: 16px;
+          border: 2px solid #ffffff40;
+          border-top: 2px solid #ffffff;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          display: inline-block;
+          margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
       `}</style>
 
       <div className="card">
@@ -351,7 +390,14 @@ export default function CreateGroupPage() {
           </div>
 
           <button type="submit" className="button" disabled={loading}>
-            {loading ? "Creating Group..." : "Create Group"}
+            {loading ? (
+              <>
+                <div className="spinner"></div>
+                Creating Group...
+              </>
+            ) : (
+              "Create Group"
+            )}
           </button>
 
           <p className="link-container">

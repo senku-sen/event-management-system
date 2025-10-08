@@ -23,7 +23,6 @@ export default function SigninPage() {
       setError("Please enter a valid email address!")
       return
     }
-
     if (!password) {
       setError("Password is required!")
       return
@@ -32,18 +31,35 @@ export default function SigninPage() {
     setLoading(true)
 
     try {
-      const response = await api.post("/auth/login", {
-        email,
-        password,
-      })
-
-      setSuccess("Login successful!")
-      localStorage.setItem("user", JSON.stringify(response.data))
-      setTimeout(() => {
-        router.push("/profile")
-      }, 1000)
+      // Simulate API call for now - replace with actual API when backend is ready
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      // Mock login - check if user exists in localStorage
+      const storedUser = localStorage.getItem("user")
+      
+      if (storedUser) {
+        const userData = JSON.parse(storedUser)
+        
+        // Simple email match for demo (in production, backend would verify password)
+        if (userData.email === email) {
+          setSuccess("Login successful!")
+          localStorage.setItem("user", JSON.stringify(userData))
+          
+          // Clear form
+          setEmail("")
+          setPassword("")
+          
+          setTimeout(() => {
+            router.push("/groups")
+          }, 1500)
+        } else {
+          setError("Invalid email or password. Please try again.")
+        }
+      } else {
+        setError("No account found. Please register first.")
+      }
     } catch (err) {
-      setError(err.response?.data?.error || "Login failed. Please check your credentials.")
+      setError("Login failed. Please check your credentials.")
     } finally {
       setLoading(false)
     }

@@ -17,6 +17,9 @@ export default function GroupsPage() {
   const [visibilityFilter, setVisibilityFilter] = useState("all")
   const [sortBy, setSortBy] = useState("name")
   const [eventSearchTerms, setEventSearchTerms] = useState({})
+  const [successMessage, setSuccessMessage] = useState("")
+  const [deleteLoading, setDeleteLoading] = useState({})
+  const [actionLoading, setActionLoading] = useState(false)
 
 
   useEffect(() => {
@@ -108,6 +111,61 @@ export default function GroupsPage() {
       [groupId]: term
     }))
   }
+
+  const deleteGroup = async (groupId) => {
+    if (user?.role !== 'admin') {
+      setError("Only administrators can delete groups")
+      return
+    }
+
+    if (!confirm("Are you sure you want to delete this group? This action cannot be undone.")) {
+      return
+    }
+
+    setDeleteLoading(prev => ({ ...prev, [groupId]: true }))
+    setError("")
+
+    try {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      const updatedGroups = groups.filter(group => group.id !== groupId)
+      setGroups(updatedGroups)
+      localStorage.setItem("groups", JSON.stringify(updatedGroups))
+      
+      setSuccessMessage("Group deleted successfully")
+      setTimeout(() => setSuccessMessage(""), 3000)
+    } catch (err) {
+      setError("Failed to delete group. Please try again.")
+    } finally {
+      setDeleteLoading(prev => ({ ...prev, [groupId]: false }))
+    }
+  }
+
+  const refreshGroups = async () => {
+    setActionLoading(true)
+    setError("")
+    
+    try {
+      // Simulate refresh delay
+      await new Promise(resolve => setTimeout(resolve, 800))
+      loadGroups()
+      setSuccessMessage("Groups refreshed successfully")
+      setTimeout(() => setSuccessMessage(""), 2000)
+    } catch (err) {
+      setError("Failed to refresh groups")
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  // Auto-clear error messages after 5 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(""), 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [error])
 
   return (
     <div className="container">
@@ -490,6 +548,137 @@ export default function GroupsPage() {
         .event-search::placeholder {
           color: #9ca3af;
         }
+
+        .spinner {
+          width: 16px;
+          height: 16px;
+          border: 2px solid #f3f4f6;
+          border-top: 2px solid #2563eb;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          display: inline-block;
+          margin-right: 0.5rem;
+        }
+
+        .large-spinner {
+          width: 32px;
+          height: 32px;
+          border: 3px solid #f3f4f6;
+          border-top: 3px solid #2563eb;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin: 2rem auto;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        .action-buttons {
+          display: flex;
+          gap: 0.5rem;
+          margin-bottom: 1rem;
+          flex-wrap: wrap;
+        }
+
+        .refresh-button {
+          background: #10b981;
+          color: white;
+          padding: 0.5rem 1rem;
+          border: none;
+          border-radius: 6px;
+          font-size: 0.875rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: background 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .refresh-button:hover:not(:disabled) {
+          background: #059669;
+        }
+
+        .refresh-button:disabled {
+          background: #9ca3af;
+          cursor: not-allowed;
+        }
+
+        .group-actions {
+          display: flex;
+          gap: 0.5rem;
+          margin-top: 1rem;
+          justify-content: flex-end;
+        }
+
+        .delete-button {
+          background: #ef4444;
+          color: white;
+          padding: 0.5rem 0.75rem;
+          border: none;
+          border-radius: 4px;
+          font-size: 0.75rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: background 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+
+        .delete-button:hover:not(:disabled) {
+          background: #dc2626;
+        }
+
+        .delete-button:disabled {
+          background: #9ca3af;
+          cursor: not-allowed;
+        }
+
+        .edit-button {
+          background: #f59e0b;
+          color: white;
+          padding: 0.5rem 0.75rem;
+          border: none;
+          border-radius: 4px;
+          font-size: 0.75rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+
+        .edit-button:hover:not(:disabled) {
+          background: #d97706;
+        }
+
+        .edit-button:disabled {
+          background: #9ca3af;
+          cursor: not-allowed;
+        }
+
+        .role-restriction {
+          background: rgba(107, 114, 128, 0.1);
+          color: #6b7280;
+          padding: 0.75rem;
+          border-radius: 6px;
+          font-size: 0.875rem;
+          text-align: center;
+          margin-bottom: 1rem;
+          border: 1px dashed #d1d5db;
+        }
+
+        .success {
+          background: rgba(34, 197, 94, 0.1);
+          color: #22c55e;
+          padding: 0.75rem;
+          border-radius: 6px;
+          font-size: 0.875rem;
+          text-align: center;
+          margin-bottom: 1rem;
+          border: 1px solid rgba(34, 197, 94, 0.2);
+        }
       `}</style>
 
       <div className="header">
@@ -504,11 +693,34 @@ export default function GroupsPage() {
         </p>
       </div>
 
-      {user?.role === 'admin' && (
-        <Link href="/groups/create" className="create-button">
-          + Create New Group
-        </Link>
-      )}
+      <div className="action-buttons">
+        {user?.role === 'admin' ? (
+          <Link href="/groups/create" className="create-button">
+            + Create New Group
+          </Link>
+        ) : (
+          <div className="role-restriction">
+            👤 Only administrators can create groups
+          </div>
+        )}
+        
+        <button
+          onClick={refreshGroups}
+          disabled={actionLoading}
+          className="refresh-button"
+        >
+          {actionLoading ? (
+            <>
+              <div className="spinner"></div>
+              Refreshing...
+            </>
+          ) : (
+            <>
+              🔄 Refresh Groups
+            </>
+          )}
+        </button>
+      </div>
 
       <div className="search-filters">
         <div className="search-bar">
@@ -570,10 +782,14 @@ export default function GroupsPage() {
         </div>
       </div>
 
+      {successMessage && <div className="success">{successMessage}</div>}
       {error && <div className="error">{error}</div>}
 
       {loading ? (
-        <div className="loading">Loading groups...</div>
+        <div className="loading">
+          <div className="large-spinner"></div>
+          Loading groups...
+        </div>
       ) : displayGroups.length === 0 ? (
         <div className="empty-state">
           No groups available
@@ -666,6 +882,34 @@ export default function GroupsPage() {
                         )
                       })()
                     )}
+                  </div>
+                )}
+
+                {user?.role === 'admin' && (
+                  <div className="group-actions">
+                    <button
+                      onClick={() => router.push(`/groups/edit/${group.id}`)}
+                      className="edit-button"
+                      disabled={deleteLoading[group.id]}
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button
+                      onClick={() => deleteGroup(group.id)}
+                      disabled={deleteLoading[group.id]}
+                      className="delete-button"
+                    >
+                      {deleteLoading[group.id] ? (
+                        <>
+                          <div className="spinner"></div>
+                          Deleting...
+                        </>
+                      ) : (
+                        <>
+                          🗑️ Delete
+                        </>
+                      )}
+                    </button>
                   </div>
                 )}
               </div>

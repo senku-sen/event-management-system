@@ -54,21 +54,36 @@ export default function SignupPage() {
     setLoading(true)
 
     try {
-      const response = await api.post("/auth/register", {
+      // Simulate API call for now - replace with actual API when backend is ready
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      // Mock successful registration
+      const userData = {
+        id: Date.now(), // Simple ID generation for demo
         email,
-        password,
         firstName,
         lastName,
         phone,
-      })
+        role: 'user', // Default role for new registrations
+        createdAt: new Date().toISOString()
+      }
 
       setSuccess("Account created successfully!")
-      localStorage.setItem("user", JSON.stringify(response.data))
+      localStorage.setItem("user", JSON.stringify(userData))
+      
+      // Reset form
+      setEmail("")
+      setPassword("")
+      setConfirmPassword("")
+      setFirstName("")
+      setLastName("")
+      setPhone("")
+      
       setTimeout(() => {
         router.push("/login")
-      }, 1000)
+      }, 1500)
     } catch (err) {
-      setError(err.response?.data?.error || "Registration failed. Please try again.")
+      setError("Registration failed. Please try again.")
     } finally {
       setLoading(false)
     }
