@@ -1,0 +1,215 @@
+.eventCard {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  transition: all 0.3s ease;
+  animation: fadeInUp 0.4s ease-out both;
+  position: relative;
+  overflow: hidden;
+}
+
+.eventCard::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--status-color, #10b981);
+  transition: width 0.3s ease;
+}
+
+.eventCard:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
+}
+
+.eventCard:hover::before {
+  width: 6px;
+}
+
+.eventHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.eventInfo {
+  flex: 1;
+}
+
+.eventTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0 0 0.5rem 0;
+  font-family: var(--font-geist-sans);
+  line-height: 1.4;
+}
+
+.eventMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: #64748b;
+  font-family: var(--font-geist-sans);
+}
+
+.eventDate,
+.eventTime,
+.eventGroup,
+.eventLocation {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.statusBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--status-color) 10%, white);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--status-color);
+  white-space: nowrap;
+  font-family: var(--font-geist-sans);
+  border: 1px solid color-mix(in srgb, var(--status-color) 20%, white);
+}
+
+.statusIcon {
+  font-size: 0.8rem;
+}
+
+.statusText {
+  text-transform: capitalize;
+}
+
+.eventFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.attendeeInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-family: var(--font-geist-sans);
+}
+
+.attendeeIcon {
+  font-size: 0.9rem;
+}
+
+.attendeeCount {
+  font-weight: 500;
+}
+
+.joinEventButton,
+.viewEventButton {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--font-geist-sans);
+  white-space: nowrap;
+}
+
+.joinEventButton {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.joinEventButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.viewEventButton {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.viewEventButton:hover {
+  background: #e2e8f0;
+  color: #475569;
+  transform: translateY(-1px);
+}
+
+.joinEventButton:active,
+.viewEventButton:active {
+  transform: translateY(0);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .eventCard {
+    padding: 0.875rem;
+  }
+  
+  .eventHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .eventMeta {
+    gap: 0.75rem;
+  }
+  
+  .eventFooter {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .attendeeInfo {
+    justify-content: center;
+  }
+  
+  .joinEventButton,
+  .viewEventButton {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .eventMeta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .statusBadge {
+    align-self: flex-start;
+  }
+}
