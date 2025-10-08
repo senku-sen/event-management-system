@@ -1,5 +1,4 @@
 import userService from "../services/userService.js";
-import { validateRegister, validateLogin, validateRoleChange, validatePasswordReset } from "../validators/userValidator.js";
 
 const sendSuccess = (res, status = 200, message = "Success", data = {}) => {
   return res.status(status).json({
@@ -21,19 +20,25 @@ const sendError = (res, status = 500, message = "Error", error = {}) => {
   });
 };
 
-const isAdmin = (req) => req?.user?.role === "admin";
+const isAdmin = (req) => req?.user?.role === "Admin";
 
-// USR-05: Register controller (USR-02 validation, USR-03 role enforcement)
 export const registerUser = async (req, res) => {
   try {
-    const { error, value } = validateRegister(req.body);
-    if (error) return sendError(res, 400, "Invalid input", error.details);
+    const { email, password, firstName, lastName, phone, address } = req.body;
 
-    // Enforce role to 'user' on self-registration per USR-03
-    const createdUser = await userService.register({ ...value, role: "user" });
+    const createdUser = await userService.register({
+      email,
+      password,
+      firstName,
+      lastName,
+      phone,
+      address,
+      role: "User",
+    });
+
     return sendSuccess(res, 201, "User registered", { user: createdUser });
   } catch (err) {
-    if (err && err.code === 11000) return sendError(res, 409, "Duplicate key", err);
+    if (err?.code === 11000) return sendError(res, 409, "Duplicate key", err);
     return sendError(res, 500, "Registration failed", { message: err?.message });
   }
 };
@@ -41,10 +46,8 @@ export const registerUser = async (req, res) => {
 // USR-05: Login controller (USR-02 validation, USR-04 authenticate & return JWT)
 export const loginUser = async (req, res) => {
   try {
-    const { error, value } = validateLogin(req.body); // expects email & password
-    if (error) return sendError(res, 400, "Invalid credentials", error.details);
-
-    const { token, user } = await userService.authenticate(value.email, value.password);
+    const { email, password } = req.body;
+    const { token, user } = await userService.authenticate(email, password);
     return sendSuccess(res, 200, "Authenticated", { token, user });
   } catch (err) {
     return sendError(res, 401, "Authentication failed", { message: err?.message });
@@ -80,10 +83,8 @@ export const listUsers = async (req, res) => {
 export const updateUserRole = async (req, res) => {
   try {
     if (!isAdmin(req)) return sendError(res, 403, "Forbidden");
-    const { error, value } = validateRoleChange(req.body);
-    if (error) return sendError(res, 400, "Invalid input", error.details);
-
-    const updatedUser = await userService.updateRole(value.userId, value.role);
+    const { userId, role } = req.body;
+    const updatedUser = await userService.updateRole(userId, role);
     return sendSuccess(res, 200, "Role updated", { user: updatedUser });
   } catch (err) {
     return sendError(res, 500, "Failed to update role", { message: err?.message });
@@ -94,12 +95,12 @@ export const updateUserRole = async (req, res) => {
 export const resetUserPassword = async (req, res) => {
   try {
     if (!isAdmin(req)) return sendError(res, 403, "Forbidden");
-    const { error, value } = validatePasswordReset(req.body);
-    if (error) return sendError(res, 400, "Invalid input", error.details);
+    const { userId, newPassword } = req.body;
 
-    await userService.resetPassword(value.userId, value.newPassword);
-    return sendSuccess(res, 200, "Password reset", { userId: value.userId });
+    await userService.resetPassword(userId, newPassword);
+    return sendSuccess(res, 200, "Password reset", { userId });
   } catch (err) {
     return sendError(res, 500, "Failed to reset password", { message: err?.message });
   }
 };
+
