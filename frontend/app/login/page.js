@@ -32,18 +32,32 @@ export default function SigninPage() {
     setLoading(true)
 
     try {
-       const response = await axios.post("http://localhost:3000/api/users/register", {
-        email,
-        password,
-      })
+      // Simulate API call for now - replace with actual API when backend is ready
+      await new Promise(resolve => setTimeout(resolve, 1500))
 
-      setSuccess("Login successful!")
-      localStorage.setItem("user", JSON.stringify(response.data))
-      setTimeout(() => {
-        router.push("/profile")
-      }, 1000)
+      // Mock login - check if user exists in localStorage
+      const registeredUsers = JSON.parse(localStorage.getItem("registeredUsers") || "[]")
+      const user = registeredUsers.find(u => u.email === email)
+
+      if (user) {
+        // Store authenticated user
+        localStorage.setItem("user", JSON.stringify({
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role || 'user'
+        }))
+
+        setSuccess("Login successful!")
+        setTimeout(() => {
+          router.push("/groups")
+        }, 1500)
+      } else {
+        setError("Invalid email or password. Please try again.")
+      }
     } catch (err) {
-      setError(err.response?.data?.error || "Login failed. Please check your credentials.")
+      setError("Login failed. Please check your credentials.")
     } finally {
       setLoading(false)
     }
@@ -54,7 +68,7 @@ export default function SigninPage() {
       <style jsx>{`
         .container {
           display: flex;
-          min-height: 100vh;
+          min-height: calc(100vh - 4rem);
           align-items: center;
           justify-content: center;
           padding: 1rem;
@@ -145,15 +159,14 @@ export default function SigninPage() {
           font-size: 0.875rem;
           width: 100%;
           box-sizing: border-box;
-          background-color: #9ca2a8ff; /* Slightly lighter on focus */
-
+          background-color: #9ca2a8ff;
         }
 
         input:focus {
           outline: none;
           border-color: #6a8eddff;
           box-shadow: 0 0 0 2px rgba(125, 154, 215, 0.2);
-          background-color: #a2c5e6ff; /* Slightly lighter on focus */
+          background-color: #a2c5e6ff;
         }
 
         .button {
@@ -192,6 +205,80 @@ export default function SigninPage() {
         .link:hover {
           text-decoration: underline;
         }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+          .container {
+            padding: 1rem 0.5rem;
+          }
+
+          .card {
+            max-width: 100%;
+            padding: 1rem;
+          }
+
+          .title {
+            font-size: 1.25rem;
+          }
+
+          .description {
+            font-size: 0.8rem;
+          }
+
+          .form-group {
+            gap: 0.375rem;
+          }
+
+          label {
+            font-size: 0.8rem;
+          }
+
+          input {
+            padding: 0.375rem;
+            font-size: 0.8rem;
+          }
+
+          .button {
+            padding: 0.625rem;
+            font-size: 0.8rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .container {
+            padding: 0.5rem;
+          }
+
+          .card {
+            padding: 0.75rem;
+          }
+
+          .title {
+            font-size: 1.125rem;
+          }
+
+          .description {
+            font-size: 0.75rem;
+          }
+
+          .form-group {
+            gap: 0.25rem;
+          }
+
+          label {
+            font-size: 0.75rem;
+          }
+
+          input {
+            padding: 0.3125rem;
+            font-size: 0.75rem;
+          }
+
+          .button {
+            padding: 0.5rem;
+            font-size: 0.75rem;
+          }
+        }
       `}</style>
 
       <div className="card">
@@ -203,7 +290,7 @@ export default function SigninPage() {
           </div>
           <div>
             <h2 className="title">Welcome back</h2>
-            <p className="description">Sign in to your library account</p>
+            <p className="description">Sign in to your account</p>
           </div>
         </div>
         <form onSubmit={handleSubmit} className="form">

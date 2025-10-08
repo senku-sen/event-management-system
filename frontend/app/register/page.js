@@ -15,7 +15,7 @@ export default function SignupPage() {
   const [lastName, setLastName] = useState("")
   const [phone, setPhone] = useState("")
   const [address, setAddress] = useState("")
-  const [role, setRole] = useState("User")
+  const [role, setRole] = useState("user")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [loading, setLoading] = useState(false)
@@ -60,23 +60,51 @@ export default function SignupPage() {
     setLoading(true)
 
     try {
-      const response = await axios.post("http://localhost:3000/api/users/register", {
+      // Simulate API call for now - replace with actual API when backend is ready
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      // Check if user already exists
+      const existingUsers = JSON.parse(localStorage.getItem("registeredUsers") || "[]")
+      const userExists = existingUsers.find(u => u.email === email)
+      
+      if (userExists) {
+        setError("An account with this email already exists!")
+        return
+      }
+
+      // Mock successful registration
+      const userData = {
+        id: Date.now(), // Simple ID generation for demo
         email,
-        password,
         firstName,
         lastName,
         phone,
-        role,
         address,
-      })
+        role: role, // Use selected role
+        createdAt: new Date().toISOString()
+      }
+
+      // Store in registered users
+      existingUsers.push(userData)
+      localStorage.setItem("registeredUsers", JSON.stringify(existingUsers))
 
       setSuccess("Account created successfully!")
-      
+
+      // Reset form
+      setEmail("")
+      setPassword("")
+      setConfirmPassword("")
+      setFirstName("")
+      setLastName("")
+      setPhone("")
+      setAddress("")
+      setRole("user")
+
       setTimeout(() => {
         router.push("/login")
-      }, 2000)
+      }, 1500)
     } catch (err) {
-      setError(err.response?.data?.error || "Registration failed. Please try again.")
+      setError("Registration failed. Please try again.")
     } finally {
       setLoading(false)
     }
@@ -87,7 +115,7 @@ export default function SignupPage() {
       <style jsx>{`
         .container {
           display: flex;
-          min-height: 100vh;
+          min-height: calc(100vh - 4rem);
           align-items: center;
           justify-content: center;
           padding: 1rem;
@@ -98,7 +126,7 @@ export default function SignupPage() {
           border-radius: 8px;
           box-shadow: 0 2px 10px rgba(21, 34, 221, 0.81);
           width: 100%;
-          max-width: 400px;
+          max-width: 500px;
           padding: 1.5rem;
         }
 
@@ -181,7 +209,8 @@ export default function SignupPage() {
           color: #1f2937;
         }
 
-        input {
+        input,
+        select {
           padding: 0.5rem;
           border: 1px solid #787c83ff;
           border-radius: 6px;
@@ -191,16 +220,69 @@ export default function SignupPage() {
           background-color: #9ca2a8ff;
         }
 
-        input:focus {
+        input:focus,
+        select:focus {
           outline: none;
           border-color: #6a8eddff;
           box-shadow: 0 0 0 2px rgba(125, 154, 215, 0.2);
           background-color: #a2c5e6ff;
         }
 
-        input:disabled {
+        input:disabled,
+        select:disabled {
           opacity: 0.6;
           cursor: not-allowed;
+        }
+
+        .role-selector {
+          display: flex;
+          gap: 0.5rem;
+          margin-top: 0.5rem;
+        }
+
+        .role-option {
+          flex: 1;
+          padding: 0.75rem;
+          border: 2px solid #e5e7eb;
+          border-radius: 6px;
+          background: white;
+          cursor: pointer;
+          text-align: center;
+          transition: all 0.2s;
+          font-size: 0.875rem;
+        }
+
+        .role-option:hover {
+          border-color: #6a8eddff;
+          background-color: #f8fafc;
+        }
+
+        .role-option.selected {
+          border-color: #2563eb;
+          background-color: #eff6ff;
+          color: #2563eb;
+          font-weight: 600;
+        }
+
+        .role-option.admin {
+          border-color: #ef4444;
+        }
+
+        .role-option.admin:hover {
+          border-color: #dc2626;
+          background-color: #fef2f2;
+        }
+
+        .role-option.admin.selected {
+          border-color: #ef4444;
+          background-color: #fef2f2;
+          color: #ef4444;
+        }
+
+        .role-description {
+          font-size: 0.75rem;
+          color: #6b7280;
+          margin-top: 0.25rem;
         }
 
         .toggle-button {
@@ -269,6 +351,122 @@ export default function SignupPage() {
           text-decoration: underline;
           color: #1d4ed8;
         }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+          .container {
+            padding: 1rem 0.5rem;
+          }
+
+          .card {
+            max-width: 100%;
+            padding: 1rem;
+          }
+
+          .title {
+            font-size: 1.25rem;
+          }
+
+          .description {
+            font-size: 0.8rem;
+          }
+
+          .grid {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+          }
+
+          .form-group {
+            gap: 0.375rem;
+          }
+
+          label {
+            font-size: 0.8rem;
+          }
+
+          input {
+            padding: 0.375rem;
+            font-size: 0.8rem;
+          }
+
+          .button {
+            padding: 0.625rem;
+            font-size: 0.8rem;
+          }
+
+          .toggle-button {
+            right: 0.375rem;
+          }
+
+          .role-selector {
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+
+          .role-option {
+            padding: 0.5rem;
+          }
+
+          .toggle-icon {
+            width: 14px;
+            height: 14px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .container {
+            padding: 0.5rem;
+          }
+
+          .card {
+            padding: 0.75rem;
+          }
+
+          .title {
+            font-size: 1.125rem;
+          }
+
+          .description {
+            font-size: 0.75rem;
+          }
+
+          .form-group {
+            gap: 0.25rem;
+          }
+
+          label {
+            font-size: 0.75rem;
+          }
+
+          input {
+            padding: 0.3125rem;
+            font-size: 0.75rem;
+          }
+
+          .button {
+            padding: 0.5rem;
+            font-size: 0.75rem;
+          }
+
+          .toggle-button {
+            right: 0.3125rem;
+            padding: 0.1875rem;
+          }
+
+          .toggle-icon {
+            width: 12px;
+            height: 12px;
+          }
+
+          .role-option {
+            padding: 0.375rem;
+            font-size: 0.75rem;
+          }
+
+          .role-description {
+            font-size: 0.625rem;
+          }
+        }
       `}</style>
 
       <div className="card">
@@ -290,35 +488,49 @@ export default function SignupPage() {
           <div className="grid">
             <div className="form-group">
               <label htmlFor="firstName">First Name</label>
-              <input 
-                id="firstName" 
-                value={firstName} 
-                onChange={(e) => setFirstName(e.target.value)} 
-                required 
+              <input
+                id="firstName"
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 disabled={loading}
+                required
               />
             </div>
             <div className="form-group">
               <label htmlFor="lastName">Last Name</label>
-              <input 
-                id="lastName" 
-                value={lastName} 
-                onChange={(e) => setLastName(e.target.value)} 
-                required 
+              <input
+                id="lastName"
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
                 disabled={loading}
+                required
               />
             </div>
           </div>
 
           <div className="form-group">
             <label htmlFor="email">Email</label>
-            <input 
-              id="email" 
-              type="email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              required 
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               disabled={loading}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="phone">Phone Number</label>
+            <input
+              id="phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              disabled={loading}
+              required
             />
           </div>
 
@@ -326,95 +538,99 @@ export default function SignupPage() {
             <label htmlFor="address">Address</label>
             <input
               id="address"
+              type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
+              disabled={loading}
               required
-              disabled={loading}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="phone">Phone</label>
-            <input 
-              id="phone" 
-              type="tel" 
-              value={phone} 
-              onChange={(e) => setPhone(e.target.value)} 
-              required 
-              disabled={loading}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <div className="input-group">
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={loading}
-              />
-              <button
-                type="button"
-                className="toggle-button"
-                onClick={() => setShowPassword(!showPassword)}
-                disabled={loading}
+            <label>Account Type</label>
+            <div className="role-selector">
+              <div
+                className={`role-option ${role === 'user' ? 'selected' : ''}`}
+                onClick={() => !loading && setRole('user')}
               >
-                <svg className="toggle-icon" viewBox="0 0 24 24">
-                  {showPassword ? (
-                    <path
-                      fill="currentColor"
-                      d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
-                    />
-                  ) : (
-                    <path
-                      fill="currentColor"
-                      d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-4 .7l2.17 2.17C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"
-                    />
-                  )}
-                </svg>
-              </button>
+                <div>👤 User</div>
+                <div className="role-description">
+                  View and join public groups and events
+                </div>
+              </div>
+              <div
+                className={`role-option admin ${role === 'admin' ? 'selected' : ''}`}
+                onClick={() => !loading && setRole('admin')}
+              >
+                <div>⚙️ Administrator</div>
+                <div className="role-description">
+                  Full access to create and manage groups
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <div className="input-group">
-              <input
-                id="confirmPassword"
-                type={showConfirmPassword ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                disabled={loading}
-              />
-              <button
-                type="button"
-                className="toggle-button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                disabled={loading}
-              >
-                <svg className="toggle-icon" viewBox="0 0 24 24">
-                  {showConfirmPassword ? (
-                    <path
-                      fill="currentColor"
-                      d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
-                    />
-                  ) : (
-                    <path
-                      fill="currentColor"
-                      d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-4 .7l2.17 2.17C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"
-                    />
-                  )}
-                </svg>
-              </button>
+          <div className="grid">
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <div className="input-group">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                  required
+                />
+                <button
+                  type="button"
+                  className="toggle-button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={loading}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  <svg className="toggle-icon" viewBox="0 0 24 24">
+                    {showPassword ? (
+                      <path fill="currentColor" d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>
+                    ) : (
+                      <path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                    )}
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div className="form-group">
+              <label htmlFor="confirmPassword">Confirm Password</label>
+              <div className="input-group">
+                <input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={loading}
+                  required
+                />
+                <button
+                  type="button"
+                  className="toggle-button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  disabled={loading}
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  <svg className="toggle-icon" viewBox="0 0 24 24">
+                    {showConfirmPassword ? (
+                      <path fill="currentColor" d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>
+                    ) : (
+                      <path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                    )}
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
 
           <button type="submit" className="button" disabled={loading}>
-            {loading ? "Creating account..." : "Sign up"}
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
 
           <p className="link-container">
