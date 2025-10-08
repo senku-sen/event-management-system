@@ -1,73 +1,69 @@
-const validateSignUp = (req, res, next) => {
-    const { email, password, phone, firstName, lastName, address } = req.body;
+// Add or update these validation functions
 
-    // Email validation
-    if (!email) {
-        return res.status(400).json({ message: "Email is required" });
+const validateRegister = (data) => {
+    const errors = {};
+    
+    if (!data.name || data.name.trim() === '') {
+        errors.name = 'Name is required';
     }
     
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-        return res.status(400).json({ message: "Invalid email format" });
+    if (!data.email || data.email.trim() === '') {
+        errors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(data.email)) {
+        errors.email = 'Email is invalid';
     }
-
-    // Password validation
-    if (!password || password.length < 8) {
-        return res
-            .status(400)
-            .json({ message: "Password must be at least 8 characters long" });
+    
+    if (!data.password || data.password.length < 6) {
+        errors.password = 'Password must be at least 6 characters';
     }
-
-    // First name validation
-    if (!firstName) {
-        return res.status(400).json({ message: "First name is required" });
-    }
-
-    // Last name validation
-    if (!lastName) {
-        return res.status(400).json({ message: "Last name is required" });
-    }
-
-    // Phone validation
-    if (!phone) {
-        return res.status(400).json({ message: "Phone number is required" });
-    }
-
-    const phonePattern = /^(?:\+63|0)9\d{9}$/;
-    if (!phonePattern.test(phone)) {
-        return res.status(400).json({
-            message:
-                "Invalid Philippine phone number. Use +639XXXXXXXXX or 09XXXXXXXXX format.",
-        });
-    }
-
-    // Address validation
-    if (!address) {
-        return res.status(400).json({ message: "Address is required" });
-    }
-
-    next();
+    
+    return {
+        isValid: Object.keys(errors).length === 0,
+        errors
+    };
 };
 
-const validateSignIn = (req, res, next) => {
-    const { email, password } = req.body;
-
-    // Email validation
-    if (!email) {
-        return res.status(400).json({ message: "Email is required" });
+const validateLogin = (data) => {
+    const errors = {};
+    
+    if (!data.email || data.email.trim() === '') {
+        errors.email = 'Email is required';
     }
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-        return res.status(400).json({ message: "Invalid email format" });
+    
+    if (!data.password || data.password.trim() === '') {
+        errors.password = 'Password is required';
     }
-
-    // Password validation
-    if (!password) {
-        return res.status(400).json({ message: "Password is required" });
-    }
-
-    next();
+    
+    return {
+        isValid: Object.keys(errors).length === 0,
+        errors
+    };
 };
 
-export { validateSignUp, validateSignIn };
+const validateRoleChange = (data) => {
+    const errors = {};
+    
+    if (!data.role || !['admin', 'user'].includes(data.role)) {
+        errors.role = 'Role must be either admin or user';
+    }
+    
+    return {
+        isValid: Object.keys(errors).length === 0,
+        errors
+    };
+};
+
+const validatePasswordReset = (data) => {
+    const errors = {};
+    
+    if (!data.newPassword || data.newPassword.length < 6) {
+        errors.newPassword = 'New password must be at least 6 characters';
+    }
+    
+    return {
+        isValid: Object.keys(errors).length === 0,
+        errors
+    };
+};
+
+export { validateRegister, validateLogin, validateRoleChange, validatePasswordReset };
