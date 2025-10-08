@@ -1,8 +1,8 @@
 import express from 'express';
 
-import { createGroup, deleteGroup, getAllGroup, getGroupById, updateGroup } from '../controllers/groupController';
+import { createGroup, deleteGroup, getAllGroup, getGroupById, updateGroup } from '../controllers/groupController.js';
 
-import { validatorGroup } from '../validators/groupValidator';
+import { validatorGroup } from '../validators/groupValidator.js';
 
 const router = express.Router();
 
