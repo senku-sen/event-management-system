@@ -209,6 +209,24 @@ const getEventsByUser = async (userId) => {
 
 
 
+// Get upcoming events
+const getUpcomingEvents = async () => {
+  try {
+    return await Event.find({ 
+      status: 'upcoming',
+      startDate: { $gt: new Date() }
+    })
+    .populate({
+      path: 'createdBy',
+      select: 'name email'
+    })
+    .sort({ startDate: 1 });
+  } catch (error) {
+    console.error("Error fetching upcoming events: ", error);
+    throw error;
+  }
+};
+
 export default {
   getEvents,
   createEvent,
@@ -216,4 +234,5 @@ export default {
   updateEvent,
   deleteEvent,
   getEventsByUser,
+  getUpcomingEvents
 };
