@@ -1,17 +1,17 @@
-import groupServices from "../services/groupService";
+import groupServices from "../services/groupService.js";
 
 
 // Get all groups
 export const getAllGroup = async (req, res) => {
   try {
-    const groups = await groupServices.getAllGroup();
+    const groups = await groupServices.getAllGroups(req.user);
     res.status(200).json({
       success: true,
       count: groups.length,
       data: groups
     });
   } catch (error) {
-    console.error("❌ Error in getAllGroup:", error);
+    console.error("Error in getAllGroup:", error);
     res.status(500).json({ 
       success: false,
       message: "Server Error", 
@@ -24,14 +24,23 @@ export const getAllGroup = async (req, res) => {
 // Create group
 export const createGroup = async (req, res) => {
   try {
-    const group = await groupServices.createGroup(req.body);
+    const requesterId = req.user?._id || req.body.createdBy;
+
+    if (!requesterId) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing requester context. Provide authenticated user or createdBy field.",
+      });
+    }
+
+    const group = await groupServices.createGroup(requesterId, req.body);
     res.status(201).json({
       success: true,
       message: "Group created successfully",
       data: group
     });
   } catch (error) {
-    console.error("❌ Error in createGroup:", error);
+    console.error("Error in createGroup:", error);
     res.status(500).json({ 
       success: false,
       message: "Server Error", 
@@ -39,8 +48,6 @@ export const createGroup = async (req, res) => {
     });
   }
 };
-
-
 
 
 export const deleteGroup = async (req, res) => {
@@ -52,7 +59,7 @@ export const deleteGroup = async (req, res) => {
       data: group
     });
   } catch (error) {
-    console.error("❌ Error in deleteGroup:", error);
+    console.error("Error in deleteGroup:", error);
     res.status(500).json({ 
       success: false,
       message: "Server Error", 
@@ -60,6 +67,7 @@ export const deleteGroup = async (req, res) => {
     });
   }
 };
+
 
 export const updateGroup = async (req, res) => {
   try {
@@ -70,7 +78,7 @@ export const updateGroup = async (req, res) => {
       data: group
     });
   } catch (error) {
-    console.error("❌ Error in updateGroup:", error);
+    console.error("Error in updateGroup:", error);
     res.status(500).json({ 
       success: false,
       message: "Server Error", 
@@ -89,6 +97,7 @@ export const getGroupById = async (req, res) => {
       data: group
     });
   } catch (error) {
+    console.error("Error in getGroupById:", error);
     console.error("❌ Error in getGroupById:", error);
     res.status(500).json({ 
       success: false,
